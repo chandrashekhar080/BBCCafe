@@ -1,0 +1,174 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --room: #0c0b09;
+    --brass: #ffc91f;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 6rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--room);
+    color: #f5f1e6;
+    font-family: Outfit, ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: #ffc91f;
+    color: #050505;
+  }
+
+  :focus-visible {
+    outline: 2px solid #ffe066;
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #6a5410 #0c0b09;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-track {
+    background: #0c0b09;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: #6a5410;
+    border-radius: 99px;
+    border: 3px solid #0c0b09;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: #ffc91f;
+  }
+}
+
+@layer components {
+  /* Yellow lamplight pooling on a dark surface. Kept low-alpha: yellow reads
+     far hotter than the amber it replaced, so the same opacity would glare. */
+  .light-pool {
+    background-image: radial-gradient(
+      120% 90% at var(--px, 50%) var(--py, 0%),
+      rgba(255, 201, 31, 0.16) 0%,
+      rgba(255, 201, 31, 0.06) 32%,
+      rgba(12, 11, 9, 0) 68%
+    );
+  }
+
+  /* Felt slab: dark felt texture under a yellow lamp wash and a falloff. */
+  .baize-surface {
+    background-color: #14110b;
+    background-image: radial-gradient(
+        75% 55% at 50% -12%,
+        rgba(255, 201, 31, 0.2) 0%,
+        rgba(255, 201, 31, 0.05) 45%,
+        rgba(20, 17, 11, 0) 72%
+      ),
+      linear-gradient(180deg, rgba(24, 20, 12, 0.34) 0%, rgba(8, 7, 5, 0.92) 100%),
+      url('/assets/texture-baize.jpg');
+    background-size: auto, auto, 200px 200px;
+  }
+
+  /* Fine film grain so large dark areas never read as flat. */
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='.42'/></svg>");
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 84rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .shell {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  /* Oversized ghosted running numeral. */
+  .numeral {
+    font-family: 'Bodoni Moda', Georgia, serif;
+    font-weight: 700;
+    line-height: 0.8;
+    letter-spacing: -0.06em;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255, 201, 31, 0.26);
+  }
+
+  .rail {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .rail > * {
+    scroll-snap-align: start;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition:
+      opacity 0.75s cubic-bezier(0.2, 0.7, 0.3, 1),
+      transform 0.75s cubic-bezier(0.2, 0.7, 0.3, 1);
+    transition-delay: var(--d, 0ms);
+  }
+  .reveal.is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    transition: background-size 0.35s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  .link-underline:hover,
+  .link-underline:focus-visible {
+    background-size: 100% 1px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
