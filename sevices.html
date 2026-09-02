@@ -11,7 +11,15 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
      <!--Font-awesome cdn link for icons-->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
+    <style>
+      /* Cart count bubble in the navbar - filled in by app/nav-badge.js */
+      .bbc-badge {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 19px; height: 19px; padding: 0 5px; margin-left: 4px;
+        border-radius: 10px; background: #FFFF00; color: #000;
+        font-size: .72rem; font-weight: 700; vertical-align: middle;
+      }
+    </style>
 </head>
 <body>
   <nav class="nav flex flex-wrap items-center md:py-1 justify-between top-0 z-50 sticky bg-gradient-to-r from-[#0d1e3c] via-[#020c1d] to-[#020917] w-full mb:px-5 md:px-9">
@@ -26,6 +34,27 @@
             <a href="index.html"
               class="block md:inline-block mb:no-underline px-4 py-3 no-underline text-white font-Poppins md:text-lg transition-all duration-300 ease-linear hover:text-[#FFFF00] mb:font-semibold mb:text-[#FFFF00]">
               Home</a>
+          </li>
+          <li class="text-center md:border-none no-underline">
+            <a href="./menu.html"
+              class="block md:inline-block px-4 py-3 no-underline text-white font-Poppins md:text-lg transition-all duration-300 ease-linear hover:text-[#FFFF00]">
+              Menu</a>
+          </li>
+          <li class="text-center md:border-none no-underline">
+            <a href="./booking.html"
+              class="block md:inline-block px-4 py-3 no-underline text-white font-Poppins md:text-lg transition-all duration-300 ease-linear hover:text-[#FFFF00]">
+              Book Seat</a>
+          </li>
+          <li class="text-center md:border-none no-underline">
+            <a href="./cart.html" id="navCart"
+              class="block md:inline-block px-4 py-3 no-underline text-white font-Poppins md:text-lg transition-all duration-300 ease-linear hover:text-[#FFFF00]">
+              <i class="fa-solid fa-cart-shopping"></i>
+              <span id="navCartCount" class="bbc-badge hidden">0</span></a>
+          </li>
+          <li class="text-center md:border-none no-underline">
+            <a href="./account.html" id="navUser"
+              class="block md:inline-block px-4 py-3 no-underline text-white font-Poppins md:text-lg transition-all duration-300 ease-linear hover:text-[#FFFF00]">
+              Login</a>
           </li>
         </ul>
     </nav>
@@ -82,7 +111,7 @@
                     </p>
                   </div>
                   <div class="flex items-center flex-wrap  py-3">
-                    <a href="./view_page/index.html" target="_blank"
+                    <a href="./menu.html?cat=Breakfast"
                       class="text-white py-1 px-3 md:text-base font-Poppins inline-flex items-center md:mb-2 lg:mb-0  border-[#FFFF00] border-2 transition-all duration-300 ease-linear hover:bg-[#FFFF00] rounded-3xl hover:text-black cursor-pointer font-semibold shadow shadow-[#FFFF00]">View
                       Menu
   
@@ -117,7 +146,7 @@
                     </p>
                   </div>
                   <div class="flex items-center flex-wrap  py-3">
-                    <a href="./view_page/index.html" target="_blank"
+                    <a href="./menu.html?cat=Main%20Course"
                       class="text-white py-1 px-3 md:text-base font-Poppins inline-flex items-center md:mb-2 lg:mb-0  border-[#FFFF00] border-2 transition-all duration-300 ease-linear hover:bg-[#FFFF00] rounded-3xl hover:text-black cursor-pointer font-semibold shadow shadow-[#FFFF00]">View
                       Menu
   
@@ -152,7 +181,7 @@
                     </p>
                   </div>
                   <div class="flex items-center flex-wrap  py-3">
-                    <a href="./view_page/index.html" target="_blank"
+                    <a href="./menu.html?cat=Main%20Course"
                       class="text-white py-1 px-3 md:text-base font-Poppins inline-flex items-center md:mb-2 lg:mb-0  border-[#FFFF00] border-2 transition-all duration-300 ease-linear hover:bg-[#FFFF00] rounded-3xl hover:text-black cursor-pointer font-semibold shadow shadow-[#FFFF00]">View
                       Menu
   
@@ -501,10 +530,10 @@
               <a href="#dynamicdiv-3" class="text-white hover:text-white">Snooker Bookings</a>
             </li>
             <li>
-              <a href="./view_page/index.html" class="text-white hover:text-white">Food Orders</a>
+              <a href="./menu.html" class="text-white hover:text-white">Food Orders</a>
             </li>
             <li>
-              <a href="./view_page/index.html" class="text-white hover:text-white">Custom Food Solutions</a>
+              <a href="./menu.html" class="text-white hover:text-white">Custom Food Solutions</a>
             </li>
           </nav>
         </div>
@@ -567,5 +596,6 @@
     <!-- Swiper JS -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+  <script src="./app/nav-badge.js"></script>
 </body>
 </html>

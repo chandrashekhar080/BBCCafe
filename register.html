@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account | Billiards Bar Cafe</title>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="./app/app.css" />
+</head>
+
+<body>
+  <div id="bbc-nav"></div>
+
+  <main class="page">
+    <div class="wrap-sm">
+      <div class="page-head">
+        <h1>Join BBC</h1>
+        <div class="bar"></div>
+        <p>One account for food orders, snooker tables and party bookings.</p>
+      </div>
+
+      <form class="panel" id="form" novalidate>
+        <div class="field" id="f-name">
+          <label for="name">Full name</label>
+          <input type="text" id="name" placeholder="e.g. Rahul Sharma" autocomplete="name" />
+          <div class="err">Please enter your name (at least 3 characters).</div>
+        </div>
+
+        <div class="field" id="f-email">
+          <label for="email">Email address</label>
+          <input type="email" id="email" placeholder="you@example.com" autocomplete="email" />
+          <div class="err">Enter a valid email address.</div>
+        </div>
+
+        <div class="field" id="f-phone">
+          <label for="phone">Mobile number</label>
+          <input type="tel" id="phone" placeholder="10 digit number" autocomplete="tel" maxlength="10" />
+          <div class="err">Enter a valid 10 digit mobile number.</div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field" id="f-pwd">
+            <label for="pwd">Password</label>
+            <input type="password" id="pwd" placeholder="Min. 6 characters" autocomplete="new-password" />
+            <div class="err">Password must be at least 6 characters.</div>
+          </div>
+          <div class="field" id="f-pwd2">
+            <label for="pwd2">Confirm password</label>
+            <input type="password" id="pwd2" placeholder="Repeat password" autocomplete="new-password" />
+            <div class="err">Passwords do not match.</div>
+          </div>
+        </div>
+
+        <div id="form-err" class="err" style="display:none;margin-bottom:12px"></div>
+
+        <button class="btn btn-primary btn-block" type="submit">
+          <i class="fa-solid fa-user-plus"></i> Create Account
+        </button>
+
+        <p class="center small muted mt-6">
+          Already have an account? <a class="link-y" id="login-link" href="./login.html">Sign in</a>
+        </p>
+      </form>
+
+      <p class="small muted center mt-6">
+        Accounts are stored in this browser only - this site has no server behind it.
+      </p>
+    </div>
+  </main>
+
+  <footer class="bbc-foot">
+    <div class="wrap">Billiards Bar Cafe, Vijay Nagar &middot; <a href="./index.html">Home</a></div>
+  </footer>
+
+  <script src="./app/data.js"></script>
+  <script src="./app/app.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      BBC.init('account');
+
+      var next = new URLSearchParams(location.search).get('next') || 'account.html';
+      if (/^[a-zA-Z]+:|^\/\//.test(next)) next = 'account.html';
+      document.getElementById('login-link').href = './login.html?next=' + encodeURIComponent(next);
+
+      if (BBC.auth.current()) location.replace('./' + next);
+
+      function mark(id, bad) {
+        document.getElementById(id).classList.toggle('invalid', bad);
+        return !bad;
+      }
+
+      document.getElementById('form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var name = document.getElementById('name').value.trim();
+        var email = document.getElementById('email').value.trim();
+        var phone = document.getElementById('phone').value.trim();
+        var pwd = document.getElementById('pwd').value;
+        var pwd2 = document.getElementById('pwd2').value;
+        var box = document.getElementById('form-err');
+        box.style.display = 'none';
+
+        var ok = mark('f-name', name.length < 3);
+        ok = mark('f-email', !/^\S+@\S+\.\S+$/.test(email)) && ok;
+        ok = mark('f-phone', !/^[6-9]\d{9}$/.test(phone)) && ok;
+        ok = mark('f-pwd', pwd.length < 6) && ok;
+        ok = mark('f-pwd2', pwd2 !== pwd || !pwd2) && ok;
+        if (!ok) return;
+
+        var res = BBC.auth.register(name, email, phone, pwd);
+        if (!res.ok) {
+          box.textContent = res.error;
+          box.style.display = 'block';
+          return;
+        }
+        BBC.toast('Account created. Welcome, ' + name.split(' ')[0] + '!');
+        setTimeout(function () { location.href = './' + next; }, 400);
+      });
+    })();
+  </script>
+</body>
+
+</html>

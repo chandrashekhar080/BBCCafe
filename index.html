@@ -42,6 +42,23 @@
             border-radius: 5px;
             border: 3px groove #ffffff;
         }
+
+        /* Cart count bubble in the navbar - filled in by app/nav-badge.js */
+        .bbc-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 19px;
+            height: 19px;
+            padding: 0 5px;
+            margin-left: 4px;
+            border-radius: 10px;
+            background: #FFFF00;
+            color: #000;
+            font-size: .72rem;
+            font-weight: 700;
+            vertical-align: middle;
+        }
     </style>
     <link rel="stylesheet" href="./index-f43426c4.css">
     <link rel="stylesheet" href="./style.css">
@@ -79,6 +96,12 @@
                     </li>
 
                     <li class=" text-center md:border-none">
+                        <a href="./menu.html"
+                            class="block md:inline-block px-4 py-3 no-underline text-white font-Poppins md:text-lg transition-all duration-300 ease-linear hover:text-[#FFFF00]">Menu
+                        </a>
+                    </li>
+
+                    <li class=" text-center md:border-none">
                         <a href="./sevices.html" target="_blank"
                             class="block md:inline-block px-4 py-3 no-underline text-white font-Poppins md:text-lg transition-all duration-300 ease-linear hover:text-[#FFFF00]">Services
                         </a>
@@ -98,9 +121,25 @@
                         </a>
                     </li>
                     <li class=" text-center md:border-none">
-                        <a href="#booktable"
+                        <a href="./booking.html"
                             class="block md:inline-block mb:px-4 py-1 rounded-3xl no-underline font-Poppins text-white md:text-lg transition-all duration-300 ease-linear hover:text-[#FFFF00] border border-[#FFFF00]">
                             Book Now
+                        </a>
+                    </li>
+
+                    <!-- Cart + account (see app/app.js for the shared store) -->
+                    <li class=" text-center md:border-none">
+                        <a href="./cart.html" id="navCart"
+                            class="block md:inline-block px-4 py-3 no-underline text-white font-Poppins md:text-lg transition-all duration-300 ease-linear hover:text-[#FFFF00]">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                            <span id="navCartCount" class="bbc-badge hidden">0</span>
+                        </a>
+                    </li>
+
+                    <li class=" text-center md:border-none">
+                        <a href="./account.html" id="navUser"
+                            class="block md:inline-block px-4 py-3 no-underline text-white font-Poppins md:text-lg transition-all duration-300 ease-linear hover:text-[#FFFF00]">
+                            Login
                         </a>
                     </li>
                 </ul>
@@ -130,7 +169,7 @@
                     <li>Enjoy a game of snooker in a vibrant, social atmosphere.</li>
                 </ul>
                 <div class="text-white md:space-x-5 mb:space-x-3 md:py-4 mb:w-full mb:py-5">
-                    <a href="#booktable"> <button
+                    <a href="./booking.html"> <button
                             class="py-2 px-6 font-Montserrat transition-all duration-300 ease-linear hover:bg-[#FFFF00] hover:text-black font-[500] border border-[#FFFF00] rounded-3xl text-white shadow-sm shadow-[#FFFF00] md:text-base mb:text-sm">
                             Book Now
                         </button></a>
@@ -165,6 +204,13 @@
                     Billiards Bar Cafe, Vijay Nagar's premier destination. Reserve a table effortlessly to relish
                     snooker,
                     exceptional dining, and a vibrant atmosphere, ensuring an unforgettable experience awaits you.</p>
+                <p class="py-3">
+                    <a href="./booking.html"
+                        class="inline-block py-2 px-6 font-Montserrat transition-all duration-300 ease-linear hover:bg-[#FFFF00] hover:text-black font-[500] border-2 border-[#FFFF00] rounded-3xl text-white shadow shadow-[#ffff009e]">
+                        Pick your exact table on the live seat map &rarr;
+                    </a>
+                </p>
+                <p class="text-gray-500 text-xs font-Poppins pb-2">Or send us a quick enquiry below.</p>
             </div>
             <!--Book Table Form -->
             <form action="index.php" method="post"
@@ -397,7 +443,7 @@
             </div>
             <div class="flex justify-center items-center py-3">
 
-                <a href="#booktable"> <button
+                <a href="./booking.html"> <button
                         class="py-2 md:px-6 mb:px-3 font-Montserrat transition-all duration-300 ease-linear hover:bg-[#FFFF00] hover:text-black font-[500] border border-[#FFFF00] rounded-3xl text-white shadow-md shadow-[#ffff009e] md:text-lg mb:text-sm">
                         Book Now
                     </button></a>
@@ -436,7 +482,7 @@
                     <a href="#contactus"><button
                             class=" text-white border shadow shadow-[#FFFF00] border-[#FFFF00] md:py-2 md:px-6 mb:py-2 mb:px-4 focus:outline-none hover:shadow-md transition-all duration-200 ease-linear hover:shadow-[#FFFF00] rounded-3xl md:text-base font-Poppins font-[500] mb:text-sm">Contact
                             Us</button></a>
-                    <a href="#booktable"> <button
+                    <a href="./booking.html"> <button
                             class=" text-white border shadow shadow-[#FFFF00] border-[#FFFF00] md:py-2 md:px-6 mb:py-2 mb:px-4 focus:outline-none hover:shadow-md transition-all duration-200 md:text-base ease-linear hover:shadow-[#FFFF00] rounded-3xl font-Poppins font-[500] mb:text-sm">Book
                             Table</button></a>
 
@@ -538,7 +584,7 @@
                     </div>
                     <div class="flex justify-center items-center pt-3 pb-8 w-full">
 
-                        <a href="#booktable"> <button
+                        <a href="./booking.html"> <button
                                 class="py-2 md:px-6 mb:px-3 font-Montserrat transition-all duration-300 ease-linear hover:bg-[#FFFF00] hover:text-black font-[500] border border-[#FFFF00] rounded-3xl text-white shadow-md shadow-[#ffff009e] md:text-base mb:text-sm">
                                 Submit
                             </button></a>
@@ -655,7 +701,7 @@
                             <a href="#contactus" class="text-white hover:text-white">Contact Us</a>
                         </li>
                         <li>
-                            <a href="#booktable" class="text-white hover:text-white">Book Table</a>
+                            <a href="./booking.html" class="text-white hover:text-white">Book Table</a>
                         </li>
                     </nav>
                 </div>
@@ -725,7 +771,7 @@
                             </select>
                         </div>
                         <div class="py-2">
-                            <a href="#booktable"> <button
+                            <a href="./booking.html"> <button
                                     class="py-2 px-6 font-Montserrat transition-all duration-300 ease-linear hover:bg-[#FFFF00] hover:text-black font-[500] border border-[#FFFF00] rounded-3xl text-white shadow-sm shadow-[#FFFF00] md:text-base mb:text-sm">
                                     Book Now
                                 </button> </a>
@@ -787,6 +833,7 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script src="index.js"></script>
+    <script src="./app/nav-badge.js"></script>
 </body>
 
 </html>

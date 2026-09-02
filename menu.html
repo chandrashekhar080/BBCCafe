@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menu | Billiards Bar Cafe</title>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="./app/app.css" />
+</head>
+
+<body>
+  <div id="bbc-nav"></div>
+
+  <main class="page">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>Our Menu</h1>
+        <div class="bar"></div>
+        <p>From a quick poha-jalebi plate to a full dum biryani - pick what you like, add it to
+          the cart and we will have it ready by the time you rack the balls.</p>
+      </div>
+
+      <div class="menu-toolbar">
+        <div class="search">
+          <input type="search" id="q" placeholder="Search dishes, e.g. paneer, biryani, coffee..."
+            autocomplete="off" />
+        </div>
+        <div class="chips" id="diet">
+          <button class="chip active" data-diet="all">All</button>
+          <button class="chip" data-diet="veg">Veg</button>
+          <button class="chip" data-diet="nonveg">Non-Veg</button>
+        </div>
+      </div>
+
+      <div class="chips" id="cats" style="margin-bottom:26px"></div>
+
+      <div class="menu-grid" id="grid"></div>
+      <div id="none" class="empty-state hide">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        Nothing matched that search. Try another dish name.
+      </div>
+    </div>
+  </main>
+
+  <footer class="bbc-foot">
+    <div class="wrap">
+      Billiards Bar Cafe, Vijay Nagar &middot;
+      <a href="./index.html">Home</a> &middot;
+      <a href="./booking.html">Book a seat</a>
+    </div>
+  </footer>
+
+  <script src="./app/data.js"></script>
+  <script src="./app/app.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      BBC.init('menu');
+
+      var DATA = window.BBC_DATA;
+      var grid = document.getElementById('grid');
+      var none = document.getElementById('none');
+      var state = { cat: 'all', diet: 'all', q: '' };
+
+      /* Category chips, built from the catalogue so adding a dish is enough. */
+      var cats = document.getElementById('cats');
+      cats.innerHTML = ['<button class="chip active" data-cat="all">All Items</button>']
+        .concat(DATA.categories.map(function (c) {
+          return '<button class="chip" data-cat="' + BBC.esc(c) + '">' + BBC.esc(c) + '</button>';
+        })).join('');
+
+      function matches(d) {
+        if (state.cat !== 'all' && d.category !== state.cat) return false;
+        if (state.diet === 'veg' && !d.veg) return false;
+        if (state.diet === 'nonveg' && d.veg) return false;
+        if (state.q) {
+          var hay = (d.name + ' ' + d.category + ' ' + d.desc).toLowerCase();
+          if (hay.indexOf(state.q) === -1) return false;
+        }
+        return true;
+      }
+
+      function card(d) {
+        var qty = BBC.cart.qtyOf(d.id);
+        var control = qty > 0
+          ? '<div class="qty"><button data-dec="' + d.id + '">-</button><span>' + qty +
+            '</span><button data-inc="' + d.id + '">+</button></div>'
+          : '<button class="btn btn-primary btn-sm" data-add="' + d.id + '">' +
+            '<i class="fa-solid fa-plus"></i> Add</button>';
+
+        return '<article class="dish">' +
+          '<div class="thumb"><img loading="lazy" src="' + BBC.esc(d.img) + '" alt="' + BBC.esc(d.name) + '">' +
+            '<span class="cat">' + BBC.esc(d.category.toUpperCase()) + '</span></div>' +
+          '<div class="body">' +
+            '<h3><span class="' + (d.veg ? 'veg-dot' : 'nonveg-dot') + '"></span>' + BBC.esc(d.name) + '</h3>' +
+            '<p class="desc">' + BBC.esc(d.desc) + '</p>' +
+            '<div class="foot"><span class="price">' + BBC.money(d.price) + '</span>' + control + '</div>' +
+          '</div>' +
+        '</article>';
+      }
+
+      function render() {
+        var list = DATA.menu.filter(matches);
+        grid.innerHTML = list.map(card).join('');
+        none.classList.toggle('hide', list.length > 0);
+      }
+
+      /* Filters */
+      cats.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-cat]');
+        if (!b) return;
+        state.cat = b.dataset.cat;
+        cats.querySelectorAll('.chip').forEach(function (c) { c.classList.toggle('active', c === b); });
+        render();
+      });
+
+      document.getElementById('diet').addEventListener('click', function (e) {
+        var b = e.target.closest('[data-diet]');
+        if (!b) return;
+        state.diet = b.dataset.diet;
+        this.querySelectorAll('.chip').forEach(function (c) { c.classList.toggle('active', c === b); });
+        render();
+      });
+
+      document.getElementById('q').addEventListener('input', function () {
+        state.q = this.value.trim().toLowerCase();
+        render();
+      });
+
+      /* Add to cart */
+      grid.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-add]');
+        if (!b) return;
+        var dish = null;
+        DATA.menu.forEach(function (d) { if (d.id === b.dataset.add) dish = d; });
+        if (!dish) return;
+        BBC.cart.add(dish, 1);
+        BBC.toast(dish.name + ' added to cart');
+      });
+
+      /* Redraw the +/- controls whenever the cart changes anywhere. */
+      document.addEventListener('bbc:cart', render);
+
+      /* Deep link support: menu.html?cat=Breakfast */
+      var wanted = new URLSearchParams(location.search).get('cat');
+      if (wanted) {
+        var chip = cats.querySelector('[data-cat="' + wanted.replace(/"/g, '') + '"]');
+        if (chip) chip.click(); else render();
+      } else {
+        render();
+      }
+    })();
+  </script>
+</body>
+
+</html>

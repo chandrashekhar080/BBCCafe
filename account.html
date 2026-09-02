@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Account | Billiards Bar Cafe</title>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="./app/app.css" />
+</head>
+
+<body>
+  <div id="bbc-nav"></div>
+
+  <main class="page">
+    <div class="wrap">
+      <div class="panel row-between" style="flex-wrap:wrap;margin-bottom:26px">
+        <div class="row" style="align-items:center">
+          <div class="avatar" id="initial">B</div>
+          <div>
+            <h1 style="font-size:1.35rem;font-weight:600" id="uname">-</h1>
+            <div class="small muted" id="umail">-</div>
+            <div class="small muted" id="uphone">-</div>
+          </div>
+        </div>
+        <div class="row" style="flex-wrap:wrap">
+          <a class="btn btn-sm" href="./menu.html"><i class="fa-solid fa-utensils"></i> Order food</a>
+          <a class="btn btn-sm" href="./booking.html"><i class="fa-solid fa-chair"></i> Book a seat</a>
+          <button class="btn btn-sm btn-plain" id="logout">
+            <i class="fa-solid fa-right-from-bracket"></i> Log out</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="active" data-tab="orders">My Orders (<span id="n-o">0</span>)</button>
+        <button data-tab="bookings">My Bookings (<span id="n-b">0</span>)</button>
+      </div>
+
+      <div id="orders"></div>
+      <div id="bookings" class="hide"></div>
+    </div>
+  </main>
+
+  <footer class="bbc-foot">
+    <div class="wrap">Billiards Bar Cafe, Vijay Nagar &middot; <a href="./index.html">Home</a></div>
+  </footer>
+
+  <script src="./app/data.js"></script>
+  <script src="./app/app.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      BBC.init('account');
+
+      if (!BBC.auth.require()) return;
+      var me = BBC.auth.current();
+
+      document.getElementById('initial').textContent = me.name.charAt(0).toUpperCase();
+      document.getElementById('uname').textContent = me.name;
+      document.getElementById('umail').textContent = me.email;
+      document.getElementById('uphone').textContent = '+91 ' + me.phone;
+
+      document.getElementById('logout').addEventListener('click', function () {
+        BBC.auth.logout();
+        BBC.toast('Logged out');
+        setTimeout(function () { location.href = './index.html'; }, 350);
+      });
+
+      /* ------------------------------------------------------- tabs */
+      document.querySelector('.tabs').addEventListener('click', function (e) {
+        var b = e.target.closest('[data-tab]');
+        if (!b) return;
+        this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('active', x === b); });
+        document.getElementById('orders').classList.toggle('hide', b.dataset.tab !== 'orders');
+        document.getElementById('bookings').classList.toggle('hide', b.dataset.tab !== 'bookings');
+      });
+
+      function statusBadge(rec) {
+        return rec.payment.status === 'paid'
+          ? '<span class="badge paid">PAID</span>'
+          : '<span class="badge confirmed">PAY AT COUNTER</span>';
+      }
+
+      /* ----------------------------------------------------- orders */
+      var orders = BBC.records.orders();
+      document.getElementById('n-o').textContent = orders.length;
+      document.getElementById('orders').innerHTML = orders.length
+        ? orders.map(function (o) {
+            return '<article class="hist">' +
+              '<div class="top"><div><span class="id">' + BBC.esc(o.id) + '</span> ' + statusBadge(o) +
+                '<div class="when">' + BBC.prettyDateTime(o.createdAt) + ' &middot; ' +
+                BBC.esc(o.orderType.replace('-', ' ')) + '</div></div>' +
+                '<div style="text-align:right"><div class="id">' + BBC.money(o.amounts.total) + '</div>' +
+                '<div class="when">' + BBC.esc(o.payment.label) + '</div></div></div>' +
+              '<div class="small muted">' + o.items.map(function (i) {
+                return BBC.esc(i.name) + ' × ' + i.qty;
+              }).join(' &middot; ') + '</div>' +
+              '<div class="mt-4"><a class="btn btn-sm" href="./success.html?id=' +
+                encodeURIComponent(o.id) + '">View receipt</a></div>' +
+            '</article>';
+          }).join('')
+        : '<div class="empty-state"><i class="fa-solid fa-receipt"></i>' +
+          'No orders yet.<div class="mt-4"><a class="btn btn-primary" href="./menu.html">' +
+          'Browse the menu</a></div></div>';
+
+      /* --------------------------------------------------- bookings */
+      var bookings = BBC.records.bookings();
+      document.getElementById('n-b').textContent = bookings.length;
+      document.getElementById('bookings').innerHTML = bookings.length
+        ? bookings.map(function (b) {
+            var past = new Date(b.date + 'T23:59:59') < new Date();
+            return '<article class="hist">' +
+              '<div class="top"><div><span class="id">' + BBC.esc(b.id) + '</span> ' + statusBadge(b) +
+                '<div class="when">Booked on ' + BBC.prettyDateTime(b.createdAt) + '</div></div>' +
+                '<div style="text-align:right"><div class="id">' + BBC.money(b.amounts.total) + '</div>' +
+                '<div class="when">' + BBC.esc(b.payment.label) + '</div></div></div>' +
+              '<div class="small">' +
+                '<b style="color:#ffff00">' + BBC.esc(b.seats.join(', ')) + '</b> &middot; ' +
+                BBC.esc(b.zones.join(', ')) + '<br>' +
+                BBC.prettyDate(b.date) + ' at ' + BBC.esc(b.slot) + ' &middot; ' +
+                b.hours + ' hr &middot; ' + b.guests + ' guest' + (b.guests > 1 ? 's' : '') +
+                (past ? ' <span class="muted">(completed)</span>' : '') +
+              '</div>' +
+              '<div class="mt-4"><a class="btn btn-sm" href="./success.html?id=' +
+                encodeURIComponent(b.id) + '">View receipt</a></div>' +
+            '</article>';
+          }).join('')
+        : '<div class="empty-state"><i class="fa-solid fa-chair"></i>' +
+          'No bookings yet.<div class="mt-4"><a class="btn btn-primary" href="./booking.html">' +
+          'Book a seat</a></div></div>';
+    })();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cart | Billiards Bar Cafe</title>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="./app/app.css" />
+</head>
+
+<body>
+  <div id="bbc-nav"></div>
+
+  <main class="page">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>Your Cart</h1>
+        <div class="bar"></div>
+      </div>
+
+      <div id="empty" class="empty-state hide">
+        <i class="fa-solid fa-basket-shopping"></i>
+        Your cart is empty right now.
+        <div class="mt-4"><a class="btn btn-primary" href="./menu.html">Browse the Menu</a></div>
+      </div>
+
+      <div class="cart-layout" id="layout">
+        <section class="panel">
+          <div class="row-between" style="margin-bottom:6px">
+            <h2 class="sec" style="margin:0">Items</h2>
+            <button class="remove-btn" id="clear">Clear cart</button>
+          </div>
+          <div id="lines"></div>
+        </section>
+
+        <aside class="panel">
+          <h2 class="sec">Order Summary</h2>
+          <div class="summary-line"><span>Subtotal</span><span id="s-sub">₹0</span></div>
+          <div class="summary-line"><span>GST (5%)</span><span id="s-tax">₹0</span></div>
+          <div class="summary-line muted small">
+            <span>Delivery</span><span>Calculated at checkout</span>
+          </div>
+          <div class="summary-total"><span>Total</span><span id="s-total">₹0</span></div>
+          <button class="btn btn-primary btn-block mt-6" id="checkout">
+            Proceed to Checkout <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          <p class="small muted center mt-4" id="login-note"></p>
+          <a class="btn btn-plain btn-block mt-4" href="./menu.html">Add more items</a>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bbc-foot">
+    <div class="wrap">Billiards Bar Cafe, Vijay Nagar &middot; <a href="./index.html">Home</a></div>
+  </footer>
+
+  <script src="./app/data.js"></script>
+  <script src="./app/app.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      BBC.init('menu');
+
+      var lines = document.getElementById('lines');
+      var layout = document.getElementById('layout');
+      var empty = document.getElementById('empty');
+
+      function render() {
+        var items = BBC.cart.items();
+        layout.classList.toggle('hide', items.length === 0);
+        empty.classList.toggle('hide', items.length > 0);
+
+        lines.innerHTML = items.map(function (i) {
+          return '<div class="cart-line">' +
+            '<img src="' + BBC.esc(i.img) + '" alt="' + BBC.esc(i.name) + '">' +
+            '<div class="info">' +
+              '<h4><span class="' + (i.veg ? 'veg-dot' : 'nonveg-dot') +
+                '" style="display:inline-flex;vertical-align:middle;margin-right:6px"></span>' +
+                BBC.esc(i.name) + '</h4>' +
+              '<div class="meta">' + BBC.esc(i.category) + ' &middot; ' + BBC.money(i.price) + ' each</div>' +
+              '<div class="qty" style="margin-top:9px">' +
+                '<button data-dec="' + i.id + '">-</button><span>' + i.qty + '</span>' +
+                '<button data-inc="' + i.id + '">+</button></div>' +
+            '</div>' +
+            '<div class="right"><div class="amount">' + BBC.money(i.price * i.qty) + '</div>' +
+              '<button class="remove-btn" data-del="' + i.id + '">Remove</button></div>' +
+          '</div>';
+        }).join('');
+
+        var t = BBC.cart.totals('dine-in');
+        document.getElementById('s-sub').textContent = BBC.money(t.subtotal);
+        document.getElementById('s-tax').textContent = BBC.money(t.tax);
+        document.getElementById('s-total').textContent = BBC.money(t.subtotal + t.tax);
+
+        var note = document.getElementById('login-note');
+        note.innerHTML = BBC.auth.current()
+          ? 'Signed in as ' + BBC.esc(BBC.auth.current().email)
+          : 'You will be asked to sign in before payment.';
+      }
+
+      document.getElementById('clear').addEventListener('click', function () {
+        if (!BBC.cart.items().length) return;
+        if (confirm('Remove all items from the cart?')) {
+          BBC.cart.clear();
+          BBC.toast('Cart cleared');
+        }
+      });
+
+      document.getElementById('checkout').addEventListener('click', function () {
+        if (!BBC.cart.items().length) return BBC.toast('Your cart is empty.', true);
+        /* Not signed in yet? Sign in first, then land straight on checkout. */
+        location.href = BBC.auth.current()
+          ? './checkout.html'
+          : './login.html?next=' + encodeURIComponent('checkout.html');
+      });
+
+      document.addEventListener('bbc:cart', render);
+      render();
+    })();
+  </script>
+</body>
+
+</html>

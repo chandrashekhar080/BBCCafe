@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book a Seat | Billiards Bar Cafe</title>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="./app/app.css" />
+</head>
+
+<body>
+  <div id="bbc-nav"></div>
+
+  <main class="page">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>Book Your Seat</h1>
+        <div class="bar"></div>
+        <p>Pick a date, a time slot and the table you want. Snooker tables are charged per hour;
+          dining and lounge seats carry a reservation amount that is adjusted against your bill.</p>
+      </div>
+
+      <div class="booking-layout">
+        <section>
+          <div class="panel" style="margin-bottom:24px">
+            <h2 class="sec">1. When are you coming?</h2>
+            <div class="grid-2">
+              <div class="field">
+                <label for="date">Date</label>
+                <input type="date" id="date" />
+              </div>
+              <div class="field">
+                <label for="guests">Number of guests</label>
+                <input type="number" id="guests" min="1" max="40" value="2" />
+              </div>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label>Time slot</label>
+              <div class="slot-grid" id="slots"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2 class="sec">2. Choose your table</h2>
+            <div class="legend">
+              <span><i class="box free"></i> Available</span>
+              <span><i class="box sel"></i> Selected</span>
+              <span><i class="box bk"></i> Already booked</span>
+            </div>
+            <div id="zones"></div>
+          </div>
+        </section>
+
+        <aside class="panel" id="summary-box">
+          <h2 class="sec">Booking Summary</h2>
+          <div class="summary-line"><span>Date</span><span id="v-date">—</span></div>
+          <div class="summary-line"><span>Time</span><span id="v-slot">—</span></div>
+          <div class="summary-line"><span>Guests</span><span id="v-guests">2</span></div>
+
+          <div class="field mt-4">
+            <label for="hours">Duration</label>
+            <select id="hours">
+              <option value="1">1 hour</option>
+              <option value="2" selected>2 hours</option>
+              <option value="3">3 hours</option>
+              <option value="4">4 hours</option>
+            </select>
+          </div>
+
+          <div id="picked" class="small muted" style="margin:6px 0 4px">No table selected yet.</div>
+          <div class="summary-line"><span>Table charge</span><span id="v-rate">₹0</span></div>
+          <div class="summary-line"><span>GST (5%)</span><span id="v-tax">₹0</span></div>
+          <div class="summary-total"><span>To pay</span><span id="v-total">₹0</span></div>
+
+          <button class="btn btn-primary btn-block mt-6" id="go">
+            Proceed to Payment <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          <p class="small muted center mt-4">Reservation amount is adjusted against your final bill.</p>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bbc-foot">
+    <div class="wrap">Billiards Bar Cafe, Vijay Nagar &middot; <a href="./index.html">Home</a></div>
+  </footer>
+
+  <script src="./app/data.js"></script>
+  <script src="./app/app.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      BBC.init('booking');
+
+      var DATA = window.BBC_DATA;
+      var TAX = DATA.charges.taxRate;
+
+      var dateEl = document.getElementById('date');
+      var slotsEl = document.getElementById('slots');
+      var zonesEl = document.getElementById('zones');
+      var guestsEl = document.getElementById('guests');
+      var hoursEl = document.getElementById('hours');
+
+      var state = { date: BBC.todayISO(), slot: DATA.slots[4], seats: [] };
+
+      dateEl.value = state.date;
+      dateEl.min = BBC.todayISO();
+
+      /* --------------------------------------------------------- slots */
+      function renderSlots() {
+        slotsEl.innerHTML = DATA.slots.map(function (s) {
+          return '<div class="slot' + (s === state.slot ? ' selected' : '') +
+            '" data-slot="' + BBC.esc(s) + '">' + BBC.esc(s) + '</div>';
+        }).join('');
+      }
+
+      slotsEl.addEventListener('click', function (e) {
+        var s = e.target.closest('[data-slot]');
+        if (!s) return;
+        state.slot = s.dataset.slot;
+        dropUnavailable();
+        renderSlots();
+        renderZones();
+        paint();
+      });
+
+      /* --------------------------------------------------------- seats */
+      function seatById(code) {
+        var hit = null;
+        DATA.zones.forEach(function (z) {
+          z.seats.forEach(function (s) { if (s.code === code) hit = { zone: z, seat: s }; });
+        });
+        return hit;
+      }
+
+      function renderZones() {
+        zonesEl.innerHTML = DATA.zones.map(function (z) {
+          var seats = z.seats.map(function (s) {
+            var taken = BBC.seatTaken(s.code, state.date, state.slot);
+            var picked = state.seats.indexOf(s.code) !== -1;
+            return '<div class="seat' + (taken ? ' booked' : '') + (picked ? ' selected' : '') + '"' +
+              (taken ? '' : ' data-seat="' + s.code + '"') + '>' +
+              '<i class="' + z.icon + '"></i>' +
+              '<div class="code">' + s.code + '</div>' +
+              '<div class="cap">' + s.cap + ' seater</div>' +
+              '<div class="rate">' + BBC.money(s.price) + '/hr</div>' +
+            '</div>';
+          }).join('');
+
+          return '<div class="zone"><h3>' + BBC.esc(z.name) + '</h3>' +
+            '<p class="zone-note">' + BBC.esc(z.note) + '</p>' +
+            '<div class="seat-grid">' + seats + '</div></div>';
+        }).join('');
+      }
+
+      zonesEl.addEventListener('click', function (e) {
+        var el = e.target.closest('[data-seat]');
+        if (!el) return;
+        var code = el.dataset.seat;
+        var at = state.seats.indexOf(code);
+        if (at === -1) state.seats.push(code); else state.seats.splice(at, 1);
+        renderZones();
+        paint();
+      });
+
+      /* Selections can go stale when the date or slot changes. */
+      function dropUnavailable() {
+        state.seats = state.seats.filter(function (c) {
+          return !BBC.seatTaken(c, state.date, state.slot);
+        });
+      }
+
+      dateEl.addEventListener('change', function () {
+        state.date = this.value || BBC.todayISO();
+        dropUnavailable();
+        renderZones();
+        paint();
+      });
+
+      guestsEl.addEventListener('input', paint);
+      hoursEl.addEventListener('change', paint);
+
+      /* ------------------------------------------------------- summary */
+      function charge() {
+        var hours = Number(hoursEl.value);
+        var perHour = state.seats.reduce(function (n, c) {
+          var f = seatById(c);
+          return n + (f ? f.seat.price : 0);
+        }, 0);
+        var base = perHour * hours;
+        var tax = Math.round(base * TAX);
+        return { hours: hours, base: base, tax: tax, total: base + tax };
+      }
+
+      function capacity() {
+        return state.seats.reduce(function (n, c) {
+          var f = seatById(c);
+          return n + (f ? f.seat.cap : 0);
+        }, 0);
+      }
+
+      function paint() {
+        var c = charge();
+        document.getElementById('v-date').textContent = BBC.prettyDate(state.date);
+        document.getElementById('v-slot').textContent = state.slot;
+        document.getElementById('v-guests').textContent = guestsEl.value || '—';
+        document.getElementById('v-rate').textContent = BBC.money(c.base);
+        document.getElementById('v-tax').textContent = BBC.money(c.tax);
+        document.getElementById('v-total').textContent = BBC.money(c.total);
+
+        var picked = document.getElementById('picked');
+        if (!state.seats.length) {
+          picked.textContent = 'No table selected yet.';
+        } else {
+          picked.innerHTML = 'Selected: <b style="color:#ffff00">' + state.seats.join(', ') +
+            '</b> &middot; seats up to ' + capacity() + ' guests &middot; ' + c.hours + ' hr';
+        }
+        document.getElementById('go').disabled = state.seats.length === 0;
+      }
+
+      /* ------------------------------------------------------- confirm */
+      document.getElementById('go').addEventListener('click', function () {
+        if (!state.seats.length) return BBC.toast('Please select at least one table.', true);
+
+        var guests = Number(guestsEl.value);
+        if (!guests || guests < 1) return BBC.toast('Enter how many guests are coming.', true);
+        if (guests > capacity()) {
+          return BBC.toast('Selected tables seat ' + capacity() + '. Pick another table for ' +
+            guests + ' guests.', true);
+        }
+
+        /* Someone may have taken the seat while this page was open. */
+        var gone = state.seats.filter(function (c) { return BBC.seatTaken(c, state.date, state.slot); });
+        if (gone.length) {
+          BBC.toast('Table ' + gone.join(', ') + ' was just booked. Please pick another.', true);
+          dropUnavailable(); renderZones(); paint();
+          return;
+        }
+
+        if (!BBC.auth.current()) {
+          BBC.pending.set(buildPending(guests));
+          location.href = './login.html?next=' + encodeURIComponent('payment.html');
+          return;
+        }
+        BBC.pending.set(buildPending(guests));
+        location.href = './payment.html';
+      });
+
+      function buildPending(guests) {
+        var c = charge();
+        var zoneNames = {};
+        state.seats.forEach(function (code) {
+          var f = seatById(code);
+          if (f) zoneNames[f.zone.name] = true;
+        });
+        return {
+          kind: 'booking',
+          date: state.date,
+          slot: state.slot,
+          hours: c.hours,
+          guests: guests,
+          seats: state.seats.slice(),
+          zones: Object.keys(zoneNames),
+          amounts: { subtotal: c.base, delivery: 0, tax: c.tax, total: c.total }
+        };
+      }
+
+      renderSlots();
+      renderZones();
+      paint();
+    })();
+  </script>
+</body>
+
+</html>

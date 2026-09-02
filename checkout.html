@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout | Billiards Bar Cafe</title>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="./app/app.css" />
+</head>
+
+<body>
+  <div id="bbc-nav"></div>
+
+  <main class="page">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>Checkout</h1>
+        <div class="bar"></div>
+      </div>
+
+      <div class="steps">
+        <span class="step done"><b>1</b> Cart</span><span class="sep"></span>
+        <span class="step done"><b>2</b> Details</span><span class="sep"></span>
+        <span class="step"><b>3</b> Payment</span><span class="sep"></span>
+        <span class="step"><b>4</b> Done</span>
+      </div>
+
+      <form class="cart-layout" id="form" novalidate>
+        <section class="panel">
+          <h2 class="sec">How would you like it?</h2>
+          <div class="chips" id="order-type" style="margin-bottom:22px">
+            <button type="button" class="chip active" data-type="dine-in">
+              <i class="fa-solid fa-utensils"></i> Dine In</button>
+            <button type="button" class="chip" data-type="takeaway">
+              <i class="fa-solid fa-bag-shopping"></i> Takeaway</button>
+            <button type="button" class="chip" data-type="delivery">
+              <i class="fa-solid fa-motorcycle"></i> Delivery</button>
+          </div>
+
+          <h2 class="sec">Contact details</h2>
+          <div class="grid-2">
+            <div class="field" id="f-name">
+              <label for="name">Full name</label>
+              <input type="text" id="name" placeholder="Your name" />
+              <div class="err">Please enter your name.</div>
+            </div>
+            <div class="field" id="f-phone">
+              <label for="phone">Mobile number</label>
+              <input type="tel" id="phone" maxlength="10" placeholder="10 digit number" />
+              <div class="err">Enter a valid 10 digit mobile number.</div>
+            </div>
+          </div>
+
+          <div class="field" id="f-email">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="you@example.com" />
+            <div class="err">Enter a valid email address.</div>
+          </div>
+
+          <!-- Dine-in only -->
+          <div id="dine-block">
+            <div class="grid-2">
+              <div class="field">
+                <label for="table">Table preference</label>
+                <select id="table">
+                  <option value="Any available table">Any available table</option>
+                  <option value="Snooker Floor">Near the snooker floor</option>
+                  <option value="Cafe Dining">Cafe dining area</option>
+                  <option value="Party Lounge">Party lounge booth</option>
+                </select>
+                <div class="hint">Need a guaranteed seat?
+                  <a class="link-y" href="./booking.html">Reserve one here</a>.</div>
+              </div>
+              <div class="field" id="f-when">
+                <label for="when">Arriving at</label>
+                <input type="time" id="when" />
+                <div class="err">Pick a time.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Delivery only -->
+          <div id="deliver-block" class="hide">
+            <div class="field" id="f-addr">
+              <label for="addr">Delivery address</label>
+              <textarea id="addr" rows="3" placeholder="Flat / house, street, landmark"></textarea>
+              <div class="err">Please enter a delivery address.</div>
+            </div>
+            <div class="field" id="f-pin">
+              <label for="pin">Pincode</label>
+              <input type="tel" id="pin" maxlength="6" placeholder="452010" />
+              <div class="err">Enter a valid 6 digit pincode.</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="notes">Cooking / delivery instructions <span class="muted">(optional)</span></label>
+            <textarea id="notes" rows="2" placeholder="e.g. less spicy, no onion"></textarea>
+          </div>
+        </section>
+
+        <aside class="panel">
+          <h2 class="sec">Order Summary</h2>
+          <div id="mini"></div>
+          <div class="summary-line"><span>Subtotal</span><span id="s-sub">₹0</span></div>
+          <div class="summary-line" id="row-delivery"><span>Delivery fee</span><span id="s-del">₹0</span></div>
+          <div class="summary-line"><span>GST (5%)</span><span id="s-tax">₹0</span></div>
+          <div class="summary-total"><span>To pay</span><span id="s-total">₹0</span></div>
+          <button class="btn btn-primary btn-block mt-6" type="submit">
+            Continue to Payment <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          <a class="btn btn-plain btn-block mt-4" href="./cart.html">Back to cart</a>
+        </aside>
+      </form>
+    </div>
+  </main>
+
+  <footer class="bbc-foot">
+    <div class="wrap">Billiards Bar Cafe, Vijay Nagar &middot; <a href="./index.html">Home</a></div>
+  </footer>
+
+  <script src="./app/data.js"></script>
+  <script src="./app/app.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      BBC.init('menu');
+
+      if (!BBC.auth.require()) return;
+      if (!BBC.cart.items().length) {
+        BBC.toast('Your cart is empty.', true);
+        location.replace('./menu.html');
+        return;
+      }
+
+      var me = BBC.auth.current();
+      document.getElementById('name').value = me.name;
+      document.getElementById('email').value = me.email;
+      document.getElementById('phone').value = me.phone;
+
+      var type = 'dine-in';
+
+      function paint() {
+        var t = BBC.cart.totals(type);
+        document.getElementById('s-sub').textContent = BBC.money(t.subtotal);
+        document.getElementById('s-tax').textContent = BBC.money(t.tax);
+        document.getElementById('s-del').textContent =
+          type !== 'delivery' ? '—' : (t.delivery ? BBC.money(t.delivery) : 'FREE');
+        document.getElementById('s-total').textContent = BBC.money(t.total);
+
+        document.getElementById('mini').innerHTML = BBC.cart.items().map(function (i) {
+          return '<div class="summary-line"><span>' + BBC.esc(i.name) +
+            ' &times; ' + i.qty + '</span><span>' + BBC.money(i.price * i.qty) + '</span></div>';
+        }).join('') + '<div style="height:10px"></div>';
+      }
+
+      document.getElementById('order-type').addEventListener('click', function (e) {
+        var b = e.target.closest('[data-type]');
+        if (!b) return;
+        type = b.dataset.type;
+        this.querySelectorAll('.chip').forEach(function (c) { c.classList.toggle('active', c === b); });
+        document.getElementById('dine-block').classList.toggle('hide', type !== 'dine-in');
+        document.getElementById('deliver-block').classList.toggle('hide', type !== 'delivery');
+        paint();
+      });
+
+      function mark(id, bad) {
+        document.getElementById(id).classList.toggle('invalid', bad);
+        return !bad;
+      }
+
+      document.getElementById('form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var name = document.getElementById('name').value.trim();
+        var email = document.getElementById('email').value.trim();
+        var phone = document.getElementById('phone').value.trim();
+
+        var ok = mark('f-name', name.length < 2);
+        ok = mark('f-email', !/^\S+@\S+\.\S+$/.test(email)) && ok;
+        ok = mark('f-phone', !/^[6-9]\d{9}$/.test(phone)) && ok;
+
+        var customer = { name: name, email: email, phone: phone,
+          notes: document.getElementById('notes').value.trim() };
+
+        if (type === 'delivery') {
+          var addr = document.getElementById('addr').value.trim();
+          var pin = document.getElementById('pin').value.trim();
+          ok = mark('f-addr', addr.length < 8) && ok;
+          ok = mark('f-pin', !/^\d{6}$/.test(pin)) && ok;
+          customer.address = addr;
+          customer.pincode = pin;
+        } else if (type === 'dine-in') {
+          var when = document.getElementById('when').value;
+          ok = mark('f-when', !when) && ok;
+          customer.table = document.getElementById('table').value;
+          customer.arrival = when;
+        }
+
+        if (!ok) {
+          BBC.toast('Please fix the highlighted fields.', true);
+          return;
+        }
+
+        var t = BBC.cart.totals(type);
+        BBC.pending.set({
+          kind: 'order',
+          orderType: type,
+          items: BBC.cart.items(),
+          customer: customer,
+          amounts: t
+        });
+        location.href = './payment.html';
+      });
+
+      paint();
+    })();
+  </script>
+</body>
+
+</html>
